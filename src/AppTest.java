@@ -1,20 +1,21 @@
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-
+//import java.text.SimpleDateFormat;
+//import java.util.Calendar;
+//import java.util.Date;
+//import java.util.GregorianCalendar;
 import com.telran.minimarket.MainMenu;
 import com.telran.minimarket.Minimarket;
-import com.telran.minimarket.products.HomeChemistry;
-import com.telran.minimarket.products.MilkProduct;
+//import com.telran.minimarket.products.HomeChemistry;
+//import com.telran.minimarket.products.MilkProduct;
 import com.telran.minimarket.saverreader.FileSaverReader;
+import com.telran.minimarket.saverreader.DBSaverReader;
 
 public class AppTest {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		FileSaverReader fsr = new FileSaverReader("c:\\_Minimarket", "Minimarket.txt");
-		Minimarket mrk = new Minimarket("Hi Jack", "Main street", fsr);
+		DBSaverReader dsr = new DBSaverReader("jdbc:mysql://localhost:3306/minimarket", "root", "");
+		Minimarket mrk = new Minimarket("Hi Jack", "Main street", dsr);
 		mrk.readProductsList();
 		MainMenu.mainMenu(mrk);
 //		Calendar calendar = new GregorianCalendar(2015, 10, 28);
