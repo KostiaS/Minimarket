@@ -8,6 +8,8 @@ public class Minimarket {
 	private String name = null;
 	private String address = null;
 	private HashMap<Product, Integer> productsList = null;
+	HashMap<Integer, Integer> listOfItemsForRemoving = null;
+	List<Product> TempListOfItemsForRemoving = null;
 	private ISaverReader saver = null;
 	public Minimarket(String name, String address, ISaverReader saver) {
 		super();
@@ -15,6 +17,8 @@ public class Minimarket {
 		this.address = address;
 		this.saver = saver;
 		productsList = new HashMap<Product, Integer>();
+		listOfItemsForRemoving = new HashMap<Integer, Integer>();
+		TempListOfItemsForRemoving = new LinkedList<Product>();
 	}
 	public void addProduct(Product product, int quantity) {
 		if(productsList.containsKey(product)) {
@@ -43,6 +47,9 @@ public class Minimarket {
 	}
 	public void saveProductList() {
 		saver.save(productsList);
+		if(!listOfItemsForRemoving.isEmpty()) {
+			saver.remove(listOfItemsForRemoving);
+		}
 	}
 	public void readProductsList() {
 		saver.read(productsList);
@@ -86,5 +93,11 @@ public class Minimarket {
 	}
 	public void setSaver(ISaverReader saver) {
 		this.saver = saver;
+	}
+	public HashMap<Integer, Integer> getListOfItemsForRemoving() {
+		return listOfItemsForRemoving;
+	}
+	public void setListOfItemsForRemoving(HashMap<Integer, Integer> listOfItemsForRemoving) {
+		this.listOfItemsForRemoving = listOfItemsForRemoving;
 	}
 }

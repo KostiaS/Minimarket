@@ -1,38 +1,205 @@
 package com.telran.minimarket;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.Scanner;
+
+import java.util.*;
 import com.telran.minimarket.products.*;
 
-public class MainMenu {
+public abstract class MainMenu {
 	public static void mainMenu(Minimarket mmrk) {
-//		InputStreamReader isr = new InputStreamReader(System.in);
 		Scanner reader = new Scanner(System.in);
 		String answer = null;
 		while(true) {
 			System.out.println("Choose option:");
 			System.out.println("1 -> Add product");
-			System.out.println("2 -> Display product list");
-			System.out.println("3 -> Save product list");
-			System.out.println("4 -> Save and exit");
-			System.out.println("5 -> Exit without saving");
+			System.out.println("2 -> Remove product");
+			System.out.println("3 -> Display product list");
+			System.out.println("4 -> Save product list");
+			System.out.println("5 -> Save and exit");
+			System.out.println("6 -> Exit without saving");
 			answer = reader.nextLine();
+			try {
+				int option = Integer.parseInt(answer);
+				switch(option) {
+				case 1:
+					addProductMenu(mmrk, reader);
+					break;
+				case 2:
+					removeProductMenu(mmrk, reader);
+					break;
+				case 3:
+					mmrk.displayMinimarket();
+					break;
+				case 4:
+					mmrk.saveProductList();
+					break;
+				case 5:
+					mmrk.saveProductList();
+					return;
+				case 6:
+					return;
+				default:
+					System.err.println("Please type one of the proposed number");
+				}
+			} catch (NumberFormatException e) {
+				System.err.println("Please type one of the proposed number");
+			}
+		}
+	}
+	private static void removeProductMenu(Minimarket mmrk, Scanner reader) {
+		String answer = null;
+		while(true) {
+			boolean flag = false;
+			System.out.println("Please choose how to remove:");
+			System.out.println("1. by code");
+			System.out.println("2. by name");
+			answer = reader.nextLine();
+			try {
+				int option = Integer.parseInt(answer);
+				switch(option) {
+				case 1:
+					removeProductByCode(mmrk, reader, false);
+					flag = true;
+					break;
+				case 2:
+					removeProductByName(mmrk, reader);
+					flag = false;
+					mmrk.TempListOfItemsForRemoving.clear();
+					break;
+				default:
+					System.err.println("Please type only \"1\" or \"2\"");
+				}
+				if(flag) {
+					while(true) {
+						System.out.println("Do yo want to remove another product:");
+						String str1 = "1. Yes";
+						String str2 = "2. No";
+						int res = reenterOrBack(reader, str1, str2);
+						if(res == 0) break;
+						if(res == 1) return;
+					}
+				}
+				else break;
+			} catch(NumberFormatException e) {
+				System.out.println("Please type only \"1\" or \"2\"");
+			}
+		}
+	}
+	private static void removeProductByName(Minimarket mmrk, Scanner reader) {
+		String answer = null;
+		while(true) {
+			System.out.println("Please enter name...");
+			answer = reader.nextLine();
+			HashMap<Product, Integer> productsList = mmrk.getProductsList();
+			Set<Product> prodSet = productsList.keySet();
+			for(Product prod: prodSet) {
+				if(prod.getName().contains(answer)) {
+					mmrk.TempListOfItemsForRemoving.add(prod);
+					System.out.println(prod);
+				}
+			}
+			if(!mmrk.TempListOfItemsForRemoving.isEmpty()) {
+				while(true) {
+					removeProductByCode(mmrk, reader, true);					
+					int res = -1;
+					while(true) {
+						System.out.println("Do you want to remove another product:");
+						String str1 = "1. Yes";
+						String str2 = "2. No";
+						res = reenterOrBack(reader, str1, str2);
+						if(res == 0) break;
+						if(res == 1) return;
+					}
+					if(res == 0) break;
+				}
+			}
+			else {
+				System.out.println("No product with such name was found");
+				while(true) {
+					System.out.println("Do you want to reenter name or back to previous menu:");
+					String str1 = "1. Reenter name";
+					String str2 = "2. Back to previous menu";
+					int res = reenterOrBack(reader, str1, str2);
+					if(res == 0) break;
+					if(res == 1) return;
+				}
+			}
+		}
+	}
+	private static int reenterOrBack(Scanner reader, String str1, String str2) {
+		System.out.println(str1);
+		System.out.println(str2);
+		String answer = reader.nextLine();
+		try {
 			int option = Integer.parseInt(answer);
 			switch(option) {
-			case 1:
-				addProductMenu(mmrk, reader);
-				break;
-			case 2:
-				mmrk.displayMinimarket();
-				break;
-			case 3:
-				mmrk.saveProductList();
-				break;
-			case 4:
-				mmrk.saveProductList();
-				return;
-			case 5:
-				return;
+			case 1:	return 0;
+			case 2: return 1;
+			default:
+				System.err.println("Please type only \"1\" or \"2\"");
+				return 2;
+			}
+		} catch(NumberFormatException e) {
+			System.err.println("Please type only \"1\" or \"2\"");
+			return 2;
+		}
+	}
+	private static void removeProductByCode(Minimarket mmrk, Scanner reader, boolean flag) {
+		String answer = null;
+		while(true) {
+			System.out.println("Please enter code...");
+			answer = reader.nextLine();
+			try {
+				int code = Integer.parseInt(answer);
+				if(mmrk.listOfItemsForRemoving.containsKey(code)) {
+					System.out.println("You have already removed the product with such code");
+					break;
+				}
+				HashMap<Product, Integer> productsList = mmrk.getProductsList();
+				Set<Product> prodSet = productsList.keySet();
+				Product product = null;
+				if(!flag) {
+					for(Product prod: prodSet) {
+						if(code == prod.getCode()) {
+							mmrk.listOfItemsForRemoving.put(code, prod.getGroupType());
+							product = prod;
+							break;
+						}
+					}
+				}
+				else {
+					Iterator<Product> iter = mmrk.TempListOfItemsForRemoving.iterator();
+					while(iter.hasNext()) {
+						Product prod = iter.next();
+						if(code == prod.getCode()) {
+							mmrk.listOfItemsForRemoving.put(code, iter.next().getGroupType());
+							product = prod;
+							iter.remove();
+							break;
+						}
+					}
+				}
+				if(mmrk.listOfItemsForRemoving.containsKey(code)) {
+					productsList.remove(product);
+					System.out.println("The product with code " + code + " was "
+							+ "successfully removed");
+					break;
+				}
+				else {
+					System.out.println("No product with such code was found");
+					while(true) {
+						System.out.println("Do you want to reenter code or back to previous menu:");
+						String str1 = "1. Reenter code";
+						String str2 = "2. Back to previous menu";
+						int res = reenterOrBack(reader, str1, str2);
+						if(res == 0) {
+							break;
+						}
+						if(res == 1) {
+							return;
+						}
+					}
+				}
+			} catch(NumberFormatException e) {
+				System.err.println("Please enter only numbers");
 			}
 		}
 	}
